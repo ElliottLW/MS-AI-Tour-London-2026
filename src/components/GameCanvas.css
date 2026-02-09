@@ -1,0 +1,42 @@
+.game-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.game-canvas {
+  border: 3px solid;
+  border-image: linear-gradient(135deg, #00ffff 0%, #ff006e 50%, #00ff88 100%) 1;
+  box-shadow: 
+    0 0 30px rgba(0, 255, 255, 0.4),
+    0 0 60px rgba(255, 0, 110, 0.3),
+    inset 0 0 30px rgba(0, 255, 136, 0.1);
+  background: linear-gradient(135deg, #0a0e27 0%, #1a0033 50%, #0a0e27 100%);
+  border-radius: 2px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  max-width: 90vw;
+  max-height: 90vh;
+  width: auto;
+  height: auto;
+}
+
+.controls-hint {
+  color: #00ff88;
+  text-shadow: 0 0 10px #00ff88;
+  font-size: 1.1em;
+  letter-spacing: 2px;
+  text-align: center;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
