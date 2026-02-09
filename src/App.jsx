@@ -55,7 +55,7 @@ function App() {
       {gameState === 'menu' && (
         <div className="menu-screen">
           <img src="/icons8-github-copilot-188.png" alt="GitHub Copilot" className="menu-logo" />
-          <h1 className="title">SPACE INVADERS </h1>
+          <h1 className="title">GITHUB COPILOT SPACE INVADERS</h1>
           <p className="subtitle">═══════════════════════════════════════</p>
           
           <button className="neon-button" onClick={startGame}>
