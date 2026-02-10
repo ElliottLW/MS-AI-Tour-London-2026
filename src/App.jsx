@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import GameCanvas from './components/GameCanvas'
 import Leaderboard from './components/Leaderboard'
 import './App.css'
@@ -11,6 +11,8 @@ function App() {
   const [inputName, setInputName] = useState('')
   const [difficulty, setDifficulty] = useState(1) // 1-5
   const [showAllScores, setShowAllScores] = useState(false)
+  const [demoMode, setDemoMode] = useState(false)
+  const inactivityTimerRef = useRef(null)
 
   // Load leaderboard from localStorage
   useEffect(() => {
@@ -20,9 +22,59 @@ function App() {
     }
   }, [])
 
+  // Inactivity timer to start demo mode after 1 minute
+  useEffect(() => {
+    const resetInactivityTimer = () => {
+      if (inactivityTimerRef.current) {
+        clearTimeout(inactivityTimerRef.current)
+      }
+      
+      // Only start timer if we're on the menu screen
+      if (gameState === 'menu') {
+        inactivityTimerRef.current = setTimeout(() => {
+          startDemoMode()
+        }, 60000) // 1 minute
+      }
+    }
+
+    const handleUserActivity = () => {
+      resetInactivityTimer()
+    }
+
+    if (gameState === 'menu') {
+      // Reset timer when returning to menu
+      resetInactivityTimer()
+      
+      // Listen for user activity
+      window.addEventListener('mousemove', handleUserActivity)
+      window.addEventListener('keydown', handleUserActivity)
+      window.addEventListener('click', handleUserActivity)
+      
+      return () => {
+        window.removeEventListener('mousemove', handleUserActivity)
+        window.removeEventListener('keydown', handleUserActivity)
+        window.removeEventListener('click', handleUserActivity)
+        if (inactivityTimerRef.current) {
+          clearTimeout(inactivityTimerRef.current)
+        }
+      }
+    } else {
+      // Clear timer when not on menu
+      if (inactivityTimerRef.current) {
+        clearTimeout(inactivityTimerRef.current)
+      }
+    }
+  }, [gameState])
+
   const handleGameOver = (finalScore) => {
     setScore(finalScore)
-    setGameState('gameOver')
+    // If in demo mode, go straight back to menu without score submission
+    if (demoMode) {
+      setDemoMode(false)
+      setGameState('menu')
+    } else {
+      setGameState('gameOver')
+    }
   }
 
   const handleSubmitScore = () => {
@@ -41,7 +93,15 @@ function App() {
 
   const startGame = () => {
     setScore(0)
+    setDemoMode(false)
     setGameState('difficulty')
+  }
+
+  const startDemoMode = () => {
+    setScore(0)
+    setDemoMode(true)
+    setDifficulty(1) // Always use easy difficulty for demo
+    setGameState('playing')
   }
 
   return (
@@ -58,9 +118,14 @@ function App() {
           <h1 className="title">GITHUB COPILOT SPACE INVADERS</h1>
           <p className="subtitle">═══════════════════════════════════════</p>
           
-          <button className="neon-button" onClick={startGame}>
-            ★ START GAME ★
-          </button>
+          <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button className="neon-button" onClick={startGame}>
+              ★ START GAME ★
+            </button>
+            <button className="neon-button secondary" onClick={startDemoMode} style={{ fontSize: '0.9em' }}>
+              👾 DEMO MODE
+            </button>
+          </div>
 
           <Leaderboard scores={showAllScores ? leaderboard : leaderboard.slice(0, 10)} />
           
@@ -81,7 +146,7 @@ function App() {
       )}
 
       {gameState === 'playing' && (
-        <GameCanvas onGameOver={handleGameOver} difficulty={difficulty} />
+        <GameCanvas onGameOver={handleGameOver} difficulty={difficulty} demoMode={demoMode} />
       )}
 
       {gameState === 'difficulty' && (

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import './GameCanvas.css'
 
-export default function GameCanvas({ onGameOver, difficulty = 1 }) {
+export default function GameCanvas({ onGameOver, difficulty = 1, demoMode = false }) {
   const canvasRef = useRef(null)
   const [score, setScore] = useState(0)
   const [lives, setLives] = useState(3)
@@ -19,6 +19,7 @@ export default function GameCanvas({ onGameOver, difficulty = 1 }) {
     bossSpawnRate: 0,
     bulletCooldown: 0,
     heartSpawnRate: 0,
+    demoMode: demoMode,
   })
 
   // Initialize game
@@ -63,6 +64,13 @@ export default function GameCanvas({ onGameOver, difficulty = 1 }) {
 
     // Keyboard event listeners
     const handleKeyDown = (e) => {
+      // Exit demo mode on any key press
+      if (gameState.demoMode) {
+        gameState.gameRunning = false
+        onGameOver(gameState.score)
+        return
+      }
+      
       gameState.keys[e.key] = true
       if (e.key === ' ') {
         e.preventDefault()
@@ -74,6 +82,7 @@ export default function GameCanvas({ onGameOver, difficulty = 1 }) {
     }
 
     const handleKeyUp = (e) => {
+      if (gameState.demoMode) return // Ignore key up in demo mode
       gameState.keys[e.key] = false
     }
 
@@ -95,29 +104,111 @@ export default function GameCanvas({ onGameOver, difficulty = 1 }) {
       ctx.fillStyle = gradient
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      // Player movement
-      if (gameState.keys['ArrowLeft'] || gameState.keys['a']) {
-        gameState.player.x = Math.max(0, gameState.player.x - gameState.player.speed)
-      }
-      if (gameState.keys['ArrowRight'] || gameState.keys['d']) {
-        gameState.player.x = Math.min(canvas.width - gameState.player.width, gameState.player.x + gameState.player.speed)
+      // AI auto-play logic for demo mode
+      if (gameState.demoMode) {
+        // Find the closest enemy or heart
+        let closestTarget = null
+        let closestDistance = Infinity
+        let isHeart = false
+
+        // Check hearts first (higher priority if we can get them)
+        gameState.hearts.forEach(heart => {
+          const distance = Math.abs(gameState.player.x + gameState.player.width / 2 - (heart.x + heart.width / 2))
+          if (distance < closestDistance && heart.y > 100) {
+            closestDistance = distance
+            closestTarget = heart
+            isHeart = true
+          }
+        })
+
+        // If no hearts nearby, target enemies
+        if (!closestTarget || closestDistance > 200) {
+          gameState.enemies.forEach(enemy => {
+            const distance = Math.abs(gameState.player.x + gameState.player.width / 2 - (enemy.x + enemy.width / 2))
+            if (distance < closestDistance) {
+              closestDistance = distance
+              closestTarget = enemy
+              isHeart = false
+            }
+          })
+        }
+
+        // Move towards target
+        if (closestTarget) {
+          const targetCenter = closestTarget.x + closestTarget.width / 2
+          const playerCenter = gameState.player.x + gameState.player.width / 2
+          
+          if (Math.abs(targetCenter - playerCenter) > 10) {
+            if (targetCenter < playerCenter) {
+              gameState.player.x = Math.max(0, gameState.player.x - gameState.player.speed)
+            } else {
+              gameState.player.x = Math.min(canvas.width - gameState.player.width, gameState.player.x + gameState.player.speed)
+            }
+          }
+
+          // Shoot at enemies (not hearts)
+          if (!isHeart) {
+            gameState.bulletCooldown--
+            if (gameState.bulletCooldown <= 0) {
+              gameState.bullets.push({
+                x: gameState.player.x + gameState.player.width / 2 - 5,
+                y: gameState.player.y,
+                width: 10,
+                height: 20,
+                speed: 8,
+              })
+              gameState.bulletCooldown = 30
+            }
+          }
+        } else {
+          // No targets, move randomly
+          if (frameCount % 60 === 0) {
+            const randomMove = Math.random()
+            if (randomMove < 0.4 && gameState.player.x > 0) {
+              gameState.player.x = Math.max(0, gameState.player.x - gameState.player.speed * 3)
+            } else if (randomMove > 0.6 && gameState.player.x < canvas.width - gameState.player.width) {
+              gameState.player.x = Math.min(canvas.width - gameState.player.width, gameState.player.x + gameState.player.speed * 3)
+            }
+          }
+          // Still shoot occasionally
+          if (frameCount % 40 === 0) {
+            gameState.bullets.push({
+              x: gameState.player.x + gameState.player.width / 2 - 5,
+              y: gameState.player.y,
+              width: 10,
+              height: 20,
+              speed: 8,
+            })
+          }
+        }
       }
 
-      // Continuous shooting when space is held
-      if (gameState.keys[' ']) {
-        gameState.bulletCooldown--
-        if (gameState.bulletCooldown <= 0) {
-          gameState.bullets.push({
-            x: gameState.player.x + gameState.player.width / 2 - 5,
-            y: gameState.player.y,
-            width: 10,
-            height: 20,
-            speed: 8,
-          })
-          gameState.bulletCooldown = 30 // Fire every 30 frames (~500ms at 60fps)
+      // Player movement (only when not in demo mode)
+      // Player movement (only when not in demo mode)
+      if (!gameState.demoMode) {
+        if (gameState.keys['ArrowLeft'] || gameState.keys['a']) {
+          gameState.player.x = Math.max(0, gameState.player.x - gameState.player.speed)
         }
-      } else {
-        gameState.bulletCooldown = 0
+        if (gameState.keys['ArrowRight'] || gameState.keys['d']) {
+          gameState.player.x = Math.min(canvas.width - gameState.player.width, gameState.player.x + gameState.player.speed)
+        }
+
+        // Continuous shooting when space is held
+        if (gameState.keys[' ']) {
+          gameState.bulletCooldown--
+          if (gameState.bulletCooldown <= 0) {
+            gameState.bullets.push({
+              x: gameState.player.x + gameState.player.width / 2 - 5,
+              y: gameState.player.y,
+              width: 10,
+              height: 20,
+              speed: 8,
+            })
+            gameState.bulletCooldown = 30 // Fire every 30 frames (~500ms at 60fps)
+          }
+        } else {
+          gameState.bulletCooldown = 0
+        }
       }
 
       // Draw player
@@ -224,9 +315,9 @@ export default function GameCanvas({ onGameOver, difficulty = 1 }) {
 
       // Update and draw enemies
       gameState.enemies = gameState.enemies.filter((enemy, enemyIndex) => {
-        // Double enemy speed when holding down or s
+        // Double enemy speed when holding down or s (not in demo mode)
         let enemySpeed = enemy.speed
-        if (gameState.keys['ArrowDown'] || gameState.keys['s']) {
+        if (!gameState.demoMode && (gameState.keys['ArrowDown'] || gameState.keys['s'])) {
           enemySpeed *= 2
         }
         enemy.y += enemySpeed
@@ -384,6 +475,19 @@ export default function GameCanvas({ onGameOver, difficulty = 1 }) {
     // Draw lives from gameState instead of React state
     ctx.textAlign = 'right'
     ctx.fillText(`LIVES: ${'❤️'.repeat(livesCount)}`, canvasWidth - 20, 100)
+    
+    // Show DEMO MODE indicator
+    if (gameStateRef.current.demoMode) {
+      ctx.textAlign = 'center'
+      ctx.font = 'bold 32px "Courier New"'
+      ctx.fillStyle = '#ffff00'
+      ctx.shadowColor = 'rgba(255, 255, 0, 0.9)'
+      ctx.shadowBlur = 20
+      ctx.fillText('🎮 DEMO MODE 🎮', canvasWidth / 2, 40)
+      ctx.font = 'bold 18px "Courier New"'
+      ctx.fillText('Press any key to exit', canvasWidth / 2, 70)
+    }
+    
     ctx.shadowColor = 'rgba(0, 0, 0, 0)'
   }
 
@@ -396,7 +500,11 @@ export default function GameCanvas({ onGameOver, difficulty = 1 }) {
         className="game-canvas"
       />
       <div className="controls-hint">
-        ◄ ► / A D = Move | DOWN / S = Double Enemy Speed | SPACE = Shoot | ESC = Quit
+        {demoMode ? (
+          '🎮 DEMO MODE - Press any key to exit'
+        ) : (
+          '◄ ► / A D = Move | DOWN / S = Double Enemy Speed | SPACE = Shoot | ESC = Quit'
+        )}
       </div>
     </div>
   )
