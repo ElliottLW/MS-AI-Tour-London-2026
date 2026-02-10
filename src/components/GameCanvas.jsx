@@ -145,22 +145,25 @@ export default function GameCanvas({ onGameOver, difficulty = 1, demoMode = fals
               gameState.player.x = Math.min(canvas.width - gameState.player.width, gameState.player.x + gameState.player.speed)
             }
           }
+        }
 
-          // Shoot at enemies (not hearts)
-          if (!isHeart) {
-            gameState.bulletCooldown--
-            if (gameState.bulletCooldown <= 0) {
-              gameState.bullets.push({
-                x: gameState.player.x + gameState.player.width / 2 - 5,
-                y: gameState.player.y,
-                width: 10,
-                height: 20,
-                speed: 8,
-              })
-              gameState.bulletCooldown = 30
-            }
+        // Always shoot at enemies (even while collecting hearts)
+        if (gameState.enemies.length > 0) {
+          gameState.bulletCooldown--
+          if (gameState.bulletCooldown <= 0) {
+            gameState.bullets.push({
+              x: gameState.player.x + gameState.player.width / 2 - 5,
+              y: gameState.player.y,
+              width: 10,
+              height: 20,
+              speed: 8,
+            })
+            gameState.bulletCooldown = 30
           }
-        } else {
+        }
+
+        // Random movement when no targets
+        if (!closestTarget) {
           // No targets, move randomly
           if (frameCount % 60 === 0) {
             const randomMove = Math.random()
