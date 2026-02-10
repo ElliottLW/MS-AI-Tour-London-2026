@@ -100,7 +100,7 @@ function App() {
   const startDemoMode = () => {
     setScore(0)
     setDemoMode(true)
-    setDifficulty(1) // Always use easy difficulty for demo
+    setDifficulty(5) // Always use hardest difficulty for demo
     setGameState('playing')
   }
 
