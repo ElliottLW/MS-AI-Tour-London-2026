@@ -1,19 +1,25 @@
-# Vaporwave Space Invaders
+# GitHub Copilot Space Invaders 🚀
 
-A stylish, neon-themed space invaders game built with React and deployed on Azure. Features a vaporwave aesthetic with glowing UI, interactive gameplay, and a persistent leaderboard.
+A stylish, neon-themed space invaders game built with React for the **Microsoft AI Tour London 2026**. Features a vaporwave aesthetic with glowing UI, interactive gameplay, difficulty levels, boss battles, and a persistent leaderboard.
 
 ## Features
 
-- 🎮 **Classic Space Invaders Gameplay**: Dodge enemies, shoot them down, and rack up points
-- 🌈 **Vaporwave Theming**: Neon colors, scan line effects, and retro cyberpunk vibes
-- 💾 **Persistent Leaderboard**: Your scores are saved in localStorage (upgradeable to Azure Cosmos DB)
+- 🎮 **Enhanced Space Invaders Gameplay**: 3 lives, heart pickups, boss battles, and score multipliers
+- 🌈 **Vaporwave Theming**: Neon colors, scan line effects, and retro cyberpunk vibes with GitHub Copilot branding
+- 🎯 **5 Difficulty Levels**: From ROOKIE to IMPOSSIBLE with adaptive enemy speeds and score multipliers
+- 👾 **Boss Enemies**: Large bosses with 5 health spawn every ~45 seconds for 10x points
+- ❤️ **Lives & Hearts**: Start with 3 lives, collect heart pickups to gain more (max 9)
+- 🤖 **Demo Mode**: Auto-starts after 1 minute of inactivity for attraction mode
+- 💾 **Persistent Leaderboard**: Scores saved in localStorage with difficulty tracking (upgradeable to Azure Cosmos DB)
 - 📱 **Responsive Design**: Works on desktop with keyboard controls
 - ⚡ **Built with React + Vite**: Fast development and optimized builds
 
 ## Controls
 
-- **Arrow Keys** or **A/D**: Move your ship
+- **Arrow Left/Right** or **A/D**: Move your ship
 - **Spacebar**: Shoot
+- **Arrow Down** or **S**: Speed boost (doubles enemy fall speed)
+- **Escape**: Quit to menu
 
 ## Getting Started
 
@@ -61,11 +67,24 @@ az webapp up --name <app-name> --resource-group <resource-group>
 
 ## Game Mechanics
 
-- **Enemies spawn** from the top and move downward at increasing speeds
-- **Shoot enemies** to earn 10 points each
-- **Missed enemies** cost you 5 points
-- **Collision** with an enemy ends the game
-- **Difficulty increases** as your score goes up (faster enemy spawn rate)
+### Difficulty Levels
+- Choose from 5 difficulty levels before playing:
+  - **ROOKIE** (👾): Slower enemies, 1x score multiplier
+  - **WARRIOR** (👾👾): Moderate speed, 1.25x multiplier
+  - **LEGEND** (👾👾👾): Fast enemies, 1.5x multiplier
+  - **NIGHTMARE** (👾👾👾👾): Very fast, 1.75x multiplier
+  - **IMPOSSIBLE** (👾👾👾👾👾): Maximum speed, 2x multiplier
+
+### Gameplay
+- **Lives System**: Start with 3 lives, can collect up to 9
+- **Regular Enemies**: Fall from the top, shoot for points (10 × difficulty multiplier)
+- **Boss Enemies**: Spawn every ~45 seconds with 5 health, worth 10x points (100 × difficulty multiplier)
+- **Heart Pickups**: Randomly spawn to restore 1 life
+- **Missed Enemies**: Cost you 1 life when they reach the bottom
+- **Collisions**: Cost you 1 life, but you can continue if lives remain
+- **Speed Boost**: Hold Down/S to make enemies fall twice as fast
+- **Progressive Difficulty**: Enemy spawn rate increases with your score
+- **Demo Mode**: AI-controlled showcase mode starts after 1 minute of menu inactivity
 
 ## Architecture
 
@@ -95,7 +114,7 @@ Example:
 // Replace localStorage with API calls
 const response = await fetch('/api/scores', {
   method: 'POST',
-  body: JSON.stringify({ name, score })
+  body: JSON.stringify({ name, score, difficulty, timestamp: Date.now() })
 })
 ```
 
@@ -103,7 +122,8 @@ const response = await fetch('/api/scores', {
 
 - **Colors**: Edit the CSS files to change vaporwave colors
 - **Game Speed**: Adjust `speed` values in `GameCanvas.jsx`
-- **Difficulty**: Modify enemy spawn rate and speed progression
+- **Difficulty**: Modify the 5 difficulty levels and their multipliers in `App.jsx`
+- **Boss Settings**: Adjust boss health, spawn rate, and size in `GameCanvas.jsx`
 - **Canvas Size**: Change width/height in `GameCanvas.jsx`
 
 ## Technologies Used
@@ -117,11 +137,14 @@ const response = await fetch('/api/scores', {
 
 ## Future Enhancements
 
+- [x] ~~Wave system with boss enemies~~ ✅ Implemented
+- [x] ~~Lives system~~ ✅ Implemented  
+- [x] ~~Difficulty levels~~ ✅ Implemented
+- [x] ~~Demo/Attract mode~~ ✅ Implemented
 - [ ] Power-ups and special weapons
-- [ ] Wave system with boss enemies
 - [ ] Sound effects and background music
-- [ ] Multiplayer via WebSocket
 - [ ] Mobile touch controls
+- [ ] Different enemy types with unique behaviors
 - [ ] Azure Cosmos DB for global leaderboard
 - [ ] User authentication with Azure AD
 
