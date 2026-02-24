@@ -9,6 +9,7 @@ function App() {
   const [leaderboard, setLeaderboard] = useState([])
   const [playerName, setPlayerName] = useState('')
   const [inputName, setInputName] = useState('')
+  const [inputEmail, setInputEmail] = useState('')
   const [difficulty, setDifficulty] = useState(1) // 1-5
   const [showAllScores, setShowAllScores] = useState(false)
   const [demoMode, setDemoMode] = useState(false)
@@ -85,9 +86,20 @@ function App() {
       
       setLeaderboard(updated)
       localStorage.setItem('leaderboard', JSON.stringify(updated))
+      if (inputEmail.trim()) {
+        localStorage.setItem(
+          'playerEmail',
+          JSON.stringify({
+            email: inputEmail.trim(),
+            name: inputName.trim(),
+            timestamp: Date.now()
+          })
+        )
+      }
       setPlayerName(inputName)
       setGameState('menu')
       setInputName('')
+      setInputEmail('')
     }
   }
 
@@ -204,6 +216,15 @@ function App() {
             onKeyPress={(e) => e.key === 'Enter' && handleSubmitScore()}
             autoFocus
           />
+
+          <input
+            type="email"
+            className="email-input"
+            placeholder="Email (optional)"
+            value={inputEmail}
+            onChange={(e) => setInputEmail(e.target.value.substring(0, 50))}
+            onKeyPress={(e) => e.key === 'Enter' && handleSubmitScore()}
+          />
           
           <button className="neon-button" onClick={handleSubmitScore}>
             SUBMIT SCORE
@@ -212,6 +233,7 @@ function App() {
           <button className="neon-button secondary" onClick={() => {
             setGameState('menu')
             setInputName('')
+            setInputEmail('')
           }}>
             MAIN MENU
           </button>
