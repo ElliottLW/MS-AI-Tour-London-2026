@@ -198,13 +198,39 @@
   box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
 }
 
+.email-input {
+  background: rgba(0, 255, 136, 0.1);
+  border: 2px solid #00ff88;
+  color: #00ff88;
+  padding: 12px 20px;
+  font-size: 1.1em;
+  font-family: 'Courier New', monospace;
+  margin: 5px 0 20px;
+  border-radius: 2px;
+  width: 100%;
+  max-width: 300px;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
 .name-input:focus {
   outline: none;
   box-shadow: 0 0 20px rgba(0, 255, 136, 0.6), 0 0 30px rgba(0, 255, 255, 0.3);
   border-color: #00ffff;
 }
 
+.email-input:focus {
+  outline: none;
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.6), 0 0 30px rgba(0, 255, 255, 0.3);
+  border-color: #00ffff;
+}
+
 .name-input::placeholder {
+  color: rgba(0, 255, 136, 0.5);
+}
+
+.email-input::placeholder {
   color: rgba(0, 255, 136, 0.5);
 }
 
